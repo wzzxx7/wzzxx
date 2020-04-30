@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html>
+<head hexo-theme="https://volantis.js.org/#2.6.5">
+  <meta charset="utf-8">
+  <!-- SEO相关 -->
+  
+    
+  
+  <!-- 渲染优化 -->
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- 页面元数据 -->
+  
+    <title>科技爱好者周刊抓取源码 - wzzxx</title>
+  
+    <meta name="keywords" content="python,科技爱好者周刊,爬虫">
+  
+  
+    <meta name="description" content="周刊内容质量很高，截止现在都104期了，里面好多不错的网站/工具资源，只是站内并无整合，每期内容较杂，或套用103期的话题，半衰期较短，所有抓取了每期中相对半衰期较长的 文章/言论/工具等资源，整合在一起，抓取的过程记录如下">
+  
+
+  <!-- feed -->
+  
+
+  <!-- import meta -->
+  
+
+  <!-- link -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13/css/all.min.css">
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-waves@0.7.6/dist/waves.min.css">
+
+  
+
+  
+
+  
+
+  <!-- import link -->
+  
+
+  
+  
+    
+<link rel="stylesheet" href="/css/style.css">
+
+  
+
+  <script>
+    function setLoadingBarProgress(num) {
+      document.getElementById('loading-bar').style.width=num+"%";
+    }
+  </script>
+
+  
+  
+</head>
+
+<body>
+  
+  <div id="loading-bar-wrapper">
+  <div id="loading-bar"></div>
+</div>
+<header class="l_header shadow blur">
+  <div class="container">
+  <div class="wrapper">
+    <div class="nav-sub">
+      <p class="title"></p>
+      <ul class="switcher nav-list-h">
+        <li><a class="s-comment fas fa-comments fa-fw" target="_self" href="javascript:void(0)"></a></li>
+        
+          <li><a class="s-toc fas fa-list fa-fw" target="_self" href="javascript:void(0)"></a></li>
+        
+      </ul>
+    </div>
+		<div class="nav-main">
+      
+        
+        <a class="title flat-box" target="_self" href="/">
+          
+            <img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="/images/logo.png">
+          
+          
+          
+          
+        </a>
+      
+
+			<div class="menu navigation">
+				<ul class="nav-list-h">
+          
+          
+          
+            
+            
+              <li>
+                <a class="flat-box" href="/" id="home">
+                  <i class="fas fa-rss fa-fw"></i>博 客
+                </a>
+                
+              </li>
+            
+          
+          
+            
+            
+              <li>
+                <a class="flat-box" href="/categories/" id="categories">
+                  <i class="fas fa-folder-open fa-fw"></i>分 类
+                </a>
+                
+                  <ul class="list-v">
+                    
+                      
+            
+              <li>
+                <a class="flat-box" href="/categories/" id="categories">
+                  技术分享
+                </a>
+                
+              </li>
+            
+          
+                    
+                      
+            
+              <li>
+                <a class="flat-box" href="/categories/%E6%AF%8F%E6%97%A5%E4%B8%80%E8%AF%91" id="categoriesE6AF8FE697A5E4B880E8AF91">
+                  每日一译
+                </a>
+                
+              </li>
+            
+          
+                    
+                      
+            
+              <li>
+                <a class="flat-box" href="/categories/" id="categories">
+                  实用网站
+                </a>
+                
+              </li>
+            
+          
+                    
+                      
+            
+              <li>
+                <a class="flat-box" href="/categories/" id="categories">
+                  过往整理
+                </a>
+                
+              </li>
+            
+          
+                    
+                  </ul>
+                
+              </li>
+            
+          
+          
+            
+            
+              <li>
+                <a class="flat-box" href="/tags/" id="tags">
+                  <i class="fas fa-tags fa-fw"></i>标 签
+                </a>
+                
+              </li>
+            
+          
+          
+            
+            
+              <li>
+                <a class="flat-box" href="/archives/" id="archives">
+                  <i class="fas fa-archive fa-fw"></i>归 档
+                </a>
+                
+              </li>
+            
+          
+          
+            
+            
+              <li>
+                <a class="flat-box" href="/friends/" id="friends">
+                  <i class="fas fa-link fa-fw"></i>友 链
+                </a>
+                
+              </li>
+            
+          
+          
+            
+            
+              <li>
+                <a class="flat-box" href="/about/" id="about">
+                  <i class="fas fa-info-circle fa-fw"></i>关 于
+                </a>
+                
+              </li>
+            
+          
+          
+				</ul>
+			</div>
+
+      <div class="m_search">
+        <form name="searchform" class="form u-search-form">
+          <i class="icon fas fa-search fa-fw"></i>
+          <input type="text" class="input u-search-input" placeholder="搜索">
+        </form>
+      </div>
+
+			<ul class="switcher nav-list-h">
+				
+					<li><a class="s-search fas fa-search fa-fw" target="_self" href="javascript:void(0)"></a></li>
+				
+				<li>
+          <a class="s-menu fas fa-bars fa-fw" target="_self" href="javascript:void(0)"></a>
+          <ul class="menu-phone list-v navigation white-box">
+            
+              
+            
+              <li>
+                <a class="flat-box" href="/" id="home">
+                  <i class="fas fa-rss fa-fw"></i>博 客
+                </a>
+                
+              </li>
+            
+          
+            
+              
+            
+              <li>
+                <a class="flat-box" href="/categories/" id="categories">
+                  <i class="fas fa-folder-open fa-fw"></i>分 类
+                </a>
+                
+                  <ul class="list-v">
+                    
+                      
+            
+              <li>
+                <a class="flat-box" href="/categories/" id="categories">
+                  技术分享
+                </a>
+                
+              </li>
+            
+          
+                    
+                      
+            
+              <li>
+                <a class="flat-box" href="/categories/%E6%AF%8F%E6%97%A5%E4%B8%80%E8%AF%91" id="categoriesE6AF8FE697A5E4B880E8AF91">
+                  每日一译
+                </a>
+                
+              </li>
+            
+          
+                    
+                      
+            
+              <li>
+                <a class="flat-box" href="/categories/" id="categories">
+                  实用网站
+                </a>
+                
+              </li>
+            
+          
+                    
+                      
+            
+              <li>
+                <a class="flat-box" href="/categories/" id="categories">
+                  过往整理
+                </a>
+                
+              </li>
+            
+          
+                    
+                  </ul>
+                
+              </li>
+            
+          
+            
+              
+            
+              <li>
+                <a class="flat-box" href="/tags/" id="tags">
+                  <i class="fas fa-tags fa-fw"></i>标 签
+                </a>
+                
+              </li>
+            
+          
+            
+              
+            
+              <li>
+                <a class="flat-box" href="/archives/" id="archives">
+                  <i class="fas fa-archive fa-fw"></i>归 档
+                </a>
+                
+              </li>
+            
+          
+            
+              
+            
+              <li>
+                <a class="flat-box" href="/friends/" id="friends">
+                  <i class="fas fa-link fa-fw"></i>友 链
+                </a>
+                
+              </li>
+            
+          
+            
+              
+            
+              <li>
+                <a class="flat-box" href="/about/" id="about">
+                  <i class="fas fa-info-circle fa-fw"></i>关 于
+                </a>
+                
+              </li>
+            
+          
+            
+          </ul>
+        </li>
+			</ul>
+		</div>
+	</div>
+  </div>
+</header>
+
+<script>setLoadingBarProgress(40);</script>
+
+
+
+  <div class="l_body nocover">
+    <div class="body-wrapper">
+      
+
+<div class="l_main">
+  
+
+  
+    <article id="post" class="post white-box reveal shadow article-type-post" itemscope itemprop="blogPost">
+      
+
+
+  <section class="meta">
+    
+      
+      
+      <div class="meta" id="header-meta">
+        
+          
+  <h1 class="title">
+    <a href="/2020/04/26/%E7%A7%91%E6%8A%80%E7%88%B1%E5%A5%BD%E8%80%85%E5%91%A8%E5%88%8A%E6%8A%93%E5%8F%96%E8%BF%87%E7%A8%8B/">
+      科技爱好者周刊抓取源码
+    </a>
+  </h1>
+
+
+        
+        <div class="new-meta-box">
+          
+            
+          
+            
+              
+<div class="new-meta-item author">
+  <a href="https://wzzxx.top/" rel="nofollow">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="/images/avatar.jpg">
+    <p>wzzxx</p>
+  </a>
+</div>
+
+            
+          
+            
+              
+
+            
+          
+            
+              <div class="new-meta-item date" itemprop="dateUpdated" datetime="2020-04-29T11:25:57+08:00">
+  <a class="notlink">
+    <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
+    <p>更新于：2020年4月29日</p>
+  </a>
+</div>
+
+            
+          
+            
+              
+  <div class="new-meta-item wordcount">
+    <a class="notlink">
+      <i class="fas fa-keyboard fa-fw" aria-hidden="true"></i>
+      <p>字数：2.8k字</p>
+    </a>
+  </div>
+  <div class="new-meta-item readtime">
+    <a class="notlink">
+      <i class="fas fa-hourglass-half fa-fw" aria-hidden="true"></i>
+      <p>时长：14分钟</p>
+    </a>
+  </div>
+
+
+            
+          
+            
+              
+
+            
+          
+        </div>
+        
+          <hr>
+        
+      </div>
+    
+  </section>
+
+
+      <section class="article typo">
+        <div class="article-entry" itemprop="articleBody">
+          
+          <div class="note "><p>周刊内容质量很高，截止现在都104期了，里面好多不错的网站/工具资源，只是站内并无整合，每期内容较杂，或套用103期的话题，<strong>半衰期</strong>较短，所有抓取了每期中相对半衰期较长的 文章/言论/工具等资源，整合在一起，抓取的过程记录如下</p></div>
+<a id="more"></a>
+<blockquote>
+<p>数据来源 <a href="http://www.ruanyifeng.com/blog/weekly/" target="_blank" rel="external nofollow noopener noreferrer">阮一峰的科技爱好者周刊</a><br>查看网站爬取规则 <a href="http://www.ruanyifeng.com/blog/weekly/" target="_blank" rel="external nofollow noopener noreferrer">http://www.ruanyifeng.com/robots.txt</a><br>空的，违法风险 <font color="Chocolate">  0 </font> </p>
+</blockquote>
+<h2 id="过程及源码"><a href="#过程及源码" class="headerlink" title="过程及源码"></a>过程及源码</h2><h3 id="抓取过程"><a href="#抓取过程" class="headerlink" title=" 抓取过程"></a><i class="fas fa-circle-notch "></i> 抓取过程</h3><blockquote>
+<p>本身抓取并不难，无验证之类，所以第一版的时候，是把它当一个即用即抛的脚本来写的，抓取思路没考虑好，后来发现它每期的文章格式并不固定，原先思路截取字符串就得不停的打补丁做判断，勉强成型，获取的数据不干净。</p>
+</blockquote>
+<blockquote>
+<p>索性重新设计下思路，有了改良版，主要思路为 先根据二级标题分段</p>
+<ul>
+<li>获取二级标题 <code>h2</code> 位置，根据当前 <code>h2</code> 和下一个 <code>h2</code> 之间的重合 <code>p</code> 节点，获取类别数据</li>
+<li>根据类别数据，循环 <code>p</code> 节点 定位 序号的位置来分段，获取每条信息</li>
+<li>剔除掉一些不必要的，拼接字符串，变成 maskdown 可以直接用的文本</li>
+</ul>
+</blockquote>
+<h3 id="源码"><a href="#源码" class="headerlink" title=" 源码"></a><i class="fas fa-code "></i> 源码</h3><div class="tabs" id="requests_info"><ul class="nav-tabs"><li class="tab active"><a href="#requests_info-1"><i class="fas fa-code "></i> 脚本源码[改良版]</a></li><li class="tab"><a href="#requests_info-2"><i class="fas fa-code "></i> 脚本源码[第一版]</a></li></ul><div class="tab-content"><div class="tab-pane active" id="requests_info-1"><figure class="highlight"><figcaption><span>改良版，大幅缩减体积</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 真真是一个好的思路顶百行代码，原版设计的比较纠结，想比较细致的获取，费力不讨好</span></span><br><span class="line"><span class="comment"># 现在换了一种新获取方式，省了很多判断，大大缩减代码量</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> lxml <span class="keyword">import</span> etree</span><br><span class="line"><span class="keyword">import</span> re,time,functools</span><br><span class="line"></span><br><span class="line"><span class="comment"># 装饰器 - 执行耗时</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">timer</span><span class="params">(wrapped)</span>:</span></span><br><span class="line"><span class="meta">    @functools.wraps(wrapped)</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">decorated</span><span class="params">(*args,**kwargs)</span>:</span></span><br><span class="line">        st = time.time()</span><br><span class="line">        ret = wrapped(*args,**kwargs)</span><br><span class="line">        print(<span class="string">'执行耗时--&#123;&#125; 秒'</span>.format(time.time()-st))</span><br><span class="line">        <span class="keyword">return</span> ret</span><br><span class="line">    <span class="keyword">return</span> decorated</span><br><span class="line"></span><br><span class="line">header = &#123;<span class="string">'User-Agent'</span>: <span class="string">'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取url集合</span></span><br><span class="line"><span class="meta">@timer</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_all_url</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'开始获取所有url'</span>)</span><br><span class="line">    url = <span class="string">r'http://www.ruanyifeng.com/blog/weekly/'</span></span><br><span class="line">    r = requests.get(url=url,headers=header,verify=<span class="literal">False</span>)</span><br><span class="line">    r.encoding = <span class="string">'utf-8'</span>    <span class="comment"># 转换编码</span></span><br><span class="line">    html = etree.HTML(r.text)</span><br><span class="line">    list_name = html.xpath(<span class="string">'//div[@id="alpha"]//div[@class="module-content"]//li[@class="module-list-item"]/a/text()'</span>)</span><br><span class="line">    list_url = html.xpath(<span class="string">'//div[@id="alpha"]//div[@class="module-content"]//li[@class="module-list-item"]/a/@href'</span>)</span><br><span class="line">    <span class="keyword">return</span> dict(zip(list_name,list_url))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取页面资源</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_page_info</span><span class="params">(names,url=<span class="string">''</span>)</span>:</span>    </span><br><span class="line">    print(<span class="string">'--'</span>,names,<span class="string">'--'</span>)</span><br><span class="line">    data = &#123;&#125;</span><br><span class="line">    str_title = <span class="string">''</span>.join([str(x)+<span class="string">'、 '</span> <span class="keyword">for</span> x <span class="keyword">in</span> range(<span class="number">1</span>,<span class="number">15</span>)])    <span class="comment"># 匹配序号</span></span><br><span class="line">    r = requests.get(url=url,headers=header,verify=<span class="literal">False</span>)</span><br><span class="line">    r.encoding = <span class="string">'utf-8'</span>    <span class="comment"># 转换编码</span></span><br><span class="line">    html = etree.HTML(r.text)</span><br><span class="line">    </span><br><span class="line">    h2_name = html.xpath(<span class="string">'//div[@id="main-content"]//h2//text()'</span>)    <span class="comment"># 标题名称</span></span><br><span class="line">    h2_element = html.xpath(<span class="string">'//div[@id="main-content"]//h2'</span>)    <span class="comment"># 标题节点</span></span><br><span class="line">    h2_list = list(zip(h2_name,h2_element))</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,len(h2_list)):</span><br><span class="line">        tmp = []</span><br><span class="line">        <span class="keyword">if</span> len(h2_list[i][<span class="number">0</span>])&gt;<span class="number">5</span>:    <span class="comment"># 大于5个字的，广告无疑</span></span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        <span class="keyword">else</span>:        <span class="comment"># 排除不需要的</span></span><br><span class="line">            <span class="comment"># 用列表推导式替换了原来的，不用借临时变量用了</span></span><br><span class="line">            d = [ex <span class="keyword">for</span> ex <span class="keyword">in</span> [<span class="string">'本周话题'</span>,<span class="string">'图片'</span>,<span class="string">'课程'</span>,<span class="string">'面试'</span>,<span class="string">'免费'</span>,<span class="string">'封面'</span>,<span class="string">'刊首语'</span>,<span class="string">'咨询'</span>,<span class="string">'面试'</span>,<span class="string">'订阅'</span>,<span class="string">'必备'</span>,<span class="string">'资讯'</span>,<span class="string">'必备'</span>,<span class="string">'新闻'</span>,<span class="string">'回顾'</span>,<span class="string">'招聘'</span>] <span class="keyword">if</span> ex <span class="keyword">in</span> h2_list[i][<span class="number">0</span>]]</span><br><span class="line">            <span class="keyword">if</span> d != []:</span><br><span class="line">                print(<span class="string">'无用数据，跳过'</span>,h2_list[i][<span class="number">0</span>])</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">        <span class="comment"># 改变思路 获取每个标题之间的 p 标签，拼接字符串</span></span><br><span class="line">        lst1 = h2_list[i][<span class="number">1</span>].xpath(<span class="string">'./following::p[position()&lt;=30]'</span>)    </span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            lst2 = h2_list[i+<span class="number">1</span>][<span class="number">1</span>].xpath(<span class="string">'./preceding::p[position()&lt;=30]'</span>)</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            <span class="keyword">continue</span>    </span><br><span class="line">        <span class="comment"># 获取所有p，找到序号根据序号分段</span></span><br><span class="line">        st_info = []</span><br><span class="line">        st_url = []</span><br><span class="line">        st_name = []</span><br><span class="line">        lst_repet = [x <span class="keyword">for</span> x <span class="keyword">in</span> lst1 <span class="keyword">if</span> x <span class="keyword">in</span> lst2]        <span class="comment"># 获取到该类别下的a元素</span></span><br><span class="line">        <span class="keyword">for</span> p <span class="keyword">in</span> lst_repet:</span><br><span class="line">            info = p.xpath(<span class="string">'./text()'</span>)</span><br><span class="line">            <span class="keyword">if</span> st_url == []:</span><br><span class="line">                st_url = p.xpath(<span class="string">'./a/@href'</span>)        <span class="comment"># 可能有，可能空</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> st_name == []:</span><br><span class="line">                st_name = p.xpath(<span class="string">'./a/text()'</span>)    </span><br><span class="line">            <span class="comment"># 其他都用</span></span><br><span class="line">            <span class="keyword">if</span> len(info)==<span class="number">0</span>:</span><br><span class="line">                <span class="keyword">pass</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">if</span> info[<span class="number">0</span>] <span class="keyword">in</span> str_title :</span><br><span class="line">                    <span class="keyword">if</span> st_info == []:</span><br><span class="line">                        <span class="keyword">pass</span></span><br><span class="line">                    <span class="keyword">else</span>:</span><br><span class="line">                        st_info = <span class="string">''</span>.join(st_info)</span><br><span class="line">                        st_info = st_info.replace(<span class="string">'（@ 投稿）'</span>,<span class="string">' '</span>)        <span class="comment"># 过滤掉</span></span><br><span class="line">                        st_info.replace(<span class="string">'（@'</span>,<span class="string">' '</span>)    <span class="comment"># 不用赋值一遍                            </span></span><br><span class="line">                        st_info.replace(<span class="string">'-- ，'</span>,<span class="string">'-- '</span>)                            </span><br><span class="line">                        st_info.replace(<span class="string">'-- 《》'</span>,<span class="string">' '</span>)        </span><br><span class="line">                        <span class="comment"># 文摘单独</span></span><br><span class="line">                        <span class="keyword">if</span> h2_list[i][<span class="number">0</span>] == <span class="string">"文摘"</span>:</span><br><span class="line">                            <span class="keyword">if</span> st_url == []:</span><br><span class="line">                                <span class="keyword">pass</span></span><br><span class="line">                            <span class="keyword">else</span>:</span><br><span class="line">                                str_content = <span class="string">r"&gt; &lt;a href='"</span>+<span class="string">''</span>.join(st_url)+<span class="string">r"'&gt;&lt;center&gt;&lt;b&gt;"</span>+<span class="string">''</span>.join(st_name)+<span class="string">r"&lt;/b&gt;&lt;/center&gt;&lt;/a&gt;"</span>+<span class="string">"\n\n"</span></span><br><span class="line">                                tmp.append(str_content)   <span class="comment"># 改格式.</span></span><br><span class="line">                            st_info = []</span><br><span class="line">                            st_url = p.xpath(<span class="string">'./a/@href'</span>)</span><br><span class="line">                            st_name = p.xpath(<span class="string">'./a/text()'</span>)                                </span><br><span class="line">                            <span class="keyword">continue</span></span><br><span class="line">                        <span class="comment"># 其他</span></span><br><span class="line">                        <span class="keyword">if</span> st_url==[]:</span><br><span class="line">                            <span class="keyword">if</span> st_info <span class="keyword">in</span> <span class="string">'  '</span>:</span><br><span class="line">                                <span class="keyword">pass</span></span><br><span class="line">                            <span class="keyword">else</span>:</span><br><span class="line">                                str_content = <span class="string">r"&gt; "</span>+<span class="string">r"&lt;span class='p gry'&gt;+st_info+r&lt;/span&gt; "</span>+<span class="string">"\n\n"</span></span><br><span class="line">                                tmp.append(str_content)</span><br><span class="line">                        <span class="keyword">else</span>:</span><br><span class="line">                            </span><br><span class="line">                            str_content = <span class="string">r"&gt; &lt;a href='"</span>+<span class="string">''</span>.join(st_url)+<span class="string">r"'&gt;&lt;center&gt;&lt;b&gt;"</span>+<span class="string">''</span>.join(st_name)+<span class="string">r"&lt;/b&gt;&lt;/center&gt;&lt;/a&gt;"</span>+<span class="string">r"&lt;span class='p gry'&gt;+st_info+r&lt;/span&gt; "</span>+<span class="string">"\n\n"</span>    <span class="comment"># 改格式</span></span><br><span class="line">                            tmp.append(str_content)   </span><br><span class="line">                        st_info = []</span><br><span class="line">                        st_url = p.xpath(<span class="string">'./a/@href'</span>)</span><br><span class="line">                        st_name = p.xpath(<span class="string">'./a/text()'</span>)                        </span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    st_info.append(<span class="string">''</span>.join(info))</span><br><span class="line">        <span class="keyword">if</span> len(st_info)!=<span class="number">0</span>:</span><br><span class="line">            <span class="comment"># 文摘单独</span></span><br><span class="line">            <span class="keyword">if</span> h2_list[i][<span class="number">0</span>] == <span class="string">"文摘"</span>:</span><br><span class="line">                <span class="keyword">if</span> st_url == []:</span><br><span class="line">                    <span class="keyword">pass</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    str_content = <span class="string">r"&gt; &lt;a href='"</span>+<span class="string">''</span>.join(st_url)+<span class="string">r"'&gt;&lt;center&gt;&lt;b&gt;"</span>+<span class="string">''</span>.join(st_name)+<span class="string">r"&lt;/b&gt;&lt;/center&gt;&lt;/a&gt;"</span>+<span class="string">"\n\n"</span></span><br><span class="line">                    tmp.append(str_content)   <span class="comment"># 改格式.</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                st_info = <span class="string">''</span>.join(st_info)</span><br><span class="line">                st_info = st_info.replace(<span class="string">'（@ 投稿）'</span>,<span class="string">' '</span>)        <span class="comment"># 过滤掉</span></span><br><span class="line">                st_info = st_info.replace(<span class="string">'（@'</span>,<span class="string">' '</span>)</span><br><span class="line">                st_info = st_info.replace(<span class="string">'-- 《》'</span>,<span class="string">' '</span>)</span><br><span class="line">                st_info = st_info.replace(<span class="string">'-- ，'</span>,<span class="string">'-- '</span>)</span><br><span class="line">                </span><br><span class="line">                </span><br><span class="line">                <span class="keyword">if</span> st_url==[]:</span><br><span class="line">                    <span class="keyword">if</span> st_info <span class="keyword">in</span> <span class="string">'  '</span>:</span><br><span class="line">                        <span class="keyword">pass</span></span><br><span class="line">                    <span class="keyword">else</span>:</span><br><span class="line">                        str_content = <span class="string">r"&gt; "</span>+<span class="string">r"&lt;span class='p gry'&gt;+st_info+r&lt;/span&gt; "</span>+<span class="string">"\n\n"</span></span><br><span class="line">                        tmp.append(str_content)</span><br><span class="line">                <span class="keyword">else</span>:     </span><br><span class="line">                    str_content = <span class="string">r"拼接成需要的格式"</span>    <span class="comment"># 改格式</span></span><br><span class="line">                    tmp.append(str_content)   </span><br><span class="line">            st_info=[]</span><br><span class="line">            st_url = []</span><br><span class="line">            st_name = []            </span><br><span class="line">        data[h2_list[i][<span class="number">0</span>]] = <span class="string">''</span>.join(tmp)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">return</span> data    </span><br><span class="line">    </span><br><span class="line"><span class="comment"># 处理成maskdown可用内容</span></span><br><span class="line"><span class="meta">@timer</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">maskdown_form</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'**********整合数据*********'</span>)</span><br><span class="line">    all = []</span><br><span class="line">    str_lst = []</span><br><span class="line">    datas = &#123;&#125;</span><br><span class="line">    url_all_dict = get_all_url()</span><br><span class="line">    <span class="keyword">for</span> names,url <span class="keyword">in</span> url_all_dict.items():        </span><br><span class="line">        name = int(re.search(<span class="string">'.*?(\d+).*?'</span>,names)[<span class="number">1</span>]    )    <span class="comment"># 获取日期数</span></span><br><span class="line">        <span class="comment"># if 50&lt;name&lt;103 :</span></span><br><span class="line">            <span class="comment"># continue        # 获取另一半</span></span><br><span class="line">        <span class="keyword">if</span> name&lt;<span class="number">51</span> :</span><br><span class="line">            <span class="keyword">break</span>        <span class="comment"># 获取另一半</span></span><br><span class="line">    </span><br><span class="line">        data = get_page_info(names,url)</span><br><span class="line">        <span class="keyword">for</span> cls_name,cls_dt <span class="keyword">in</span> data.items():        <span class="comment"># 处理一期的数据</span></span><br><span class="line">            new_str = <span class="string">r'&lt;!-- tab  '</span>+cls_name+<span class="string">r'  --&gt;'</span>+<span class="string">'\n'</span>+cls_dt+<span class="string">r'&lt;!-- endtab  --&gt;'</span>+<span class="string">'\n'</span></span><br><span class="line">            str_lst.append(new_str)</span><br><span class="line">        </span><br><span class="line">        all.append(<span class="string">r"## "</span>+str(name)+<span class="string">"期"</span>+<span class="string">"\n"</span>+<span class="string">r'&lt;div class="tabs" id="+str(name)+"期"+r"&gt;&lt;ul class="nav-tabs"&gt;&lt;/ul&gt;&lt;div class="tab-content"&gt;&lt;/div&gt;&lt;/div&gt;'</span>+<span class="string">'\n'</span> )</span><br><span class="line"><pre><code>    str_lst.clear()        #清空
+    datas.clear()         
+return &apos;&apos;.join(all)</code></pre>&lt;h1 id="写入文件"&gt;&lt;a href="#写入文件" class="headerlink" title="写入文件"&gt;&lt;/a&gt;写入文件&lt;/h1&gt;&lt;p&gt;def write_file(data):&lt;br&gt;    with open(r’C:\oneDrive\1-笔记\unusual\file-script\科技周刊资源\资源.txt’, ‘w’,encoding = ‘utf-8’) as f:&lt;br&gt;        f.write(data)&lt;/p&gt;</span><br><span class="line">&lt;p&gt;data = maskdown_form()&lt;br&gt;write_file(data)&lt;/p&gt;</span><br></pre></td></tr></table></figure></div><div class="tab-pane" id="requests_info-2"><figure class="highlight python"><figcaption><span>初始版，能用就行</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> lxml <span class="keyword">import</span> etree</span><br><span class="line"><span class="keyword">import</span> re,time,functools</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">timer</span><span class="params">(wrapped)</span>:</span>        <span class="comment"># 检测耗时</span></span><br><span class="line"><span class="meta">    @functools.wraps(wrapped)</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">decorated</span><span class="params">(*args,**kwargs)</span>:</span></span><br><span class="line">        st = time.time()</span><br><span class="line">        ret = wrapped(*args,**kwargs)</span><br><span class="line">        print(<span class="string">'执行耗时--&#123;&#125; 秒'</span>.format(time.time()-st))</span><br><span class="line">        <span class="keyword">return</span> ret</span><br><span class="line">    <span class="keyword">return</span> decorated</span><br><span class="line"></span><br><span class="line">header = &#123;<span class="string">'User-Agent'</span>: <span class="string">'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取url集合</span></span><br><span class="line"><span class="meta">@timer</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_all_url</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'开始获取所有url'</span>)</span><br><span class="line">    url = <span class="string">r'http://www.ruanyifeng.com/blog/weekly/'</span></span><br><span class="line">    r = requests.get(url=url,headers=header,verify=<span class="literal">False</span>)</span><br><span class="line">    r.encoding = <span class="string">'utf-8'</span>    <span class="comment"># 转换编码</span></span><br><span class="line">    html = etree.HTML(r.text)</span><br><span class="line">    list_name = html.xpath(<span class="string">'//div[@id="alpha"]//div[@class="module-content"]//li[@class="module-list-item"]/a/text()'</span>)</span><br><span class="line">    list_url = html.xpath(<span class="string">'//div[@id="alpha"]//div[@class="module-content"]//li[@class="module-list-item"]/a/@href'</span>)</span><br><span class="line">    <span class="keyword">return</span> dict(zip(list_name,list_url))</span><br><span class="line">    </span><br><span class="line"><span class="comment"># 获取页面类资源</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_page_info</span><span class="params">(names,url=<span class="string">''</span>)</span>:</span>    </span><br><span class="line">    print(<span class="string">'--'</span>,names,<span class="string">'--'</span>)</span><br><span class="line">    data = &#123;&#125;</span><br><span class="line">    <span class="keyword">if</span> url==<span class="string">''</span>:</span><br><span class="line">        url = <span class="string">r'http://www.ruanyifeng.com/blog/2019/02/weekly-issue-44.html'</span></span><br><span class="line">    r = requests.get(url=url,headers=header,verify=<span class="literal">False</span>)</span><br><span class="line">    r.encoding = <span class="string">'utf-8'</span>    <span class="comment"># 转换编码</span></span><br><span class="line">    html = etree.HTML(r.text)</span><br><span class="line">    </span><br><span class="line">    h2_name = html.xpath(<span class="string">'//div[@id="main-content"]//h2//text()'</span>)</span><br><span class="line">    h2_element = html.xpath(<span class="string">'//div[@id="main-content"]//h2'</span>)    </span><br><span class="line">    h2_list = list(zip(h2_name,h2_element))</span><br><span class="line">    switch = <span class="literal">False</span>    <span class="comment"># for 只能打破最深一层的，想破两层，加个判断的变量</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,len(h2_list)):</span><br><span class="line">        tmp = []</span><br><span class="line">        <span class="keyword">if</span> len(h2_list[i][<span class="number">0</span>])&gt;<span class="number">5</span>:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">for</span> ex <span class="keyword">in</span> [<span class="string">'本周'</span>,<span class="string">'图片'</span>,<span class="string">'课程'</span>,<span class="string">'面试'</span>,<span class="string">'免费'</span>,<span class="string">'封面'</span>,<span class="string">'刊首语'</span>,<span class="string">'咨询'</span>,<span class="string">'面试'</span>,<span class="string">'订阅'</span>,<span class="string">'必备'</span>,<span class="string">'资讯'</span>,<span class="string">'必备'</span>,<span class="string">'新闻'</span>,<span class="string">'回顾'</span>,<span class="string">'招聘'</span>]:</span><br><span class="line">                <span class="keyword">if</span> ex <span class="keyword">in</span> h2_list[i][<span class="number">0</span>]:    </span><br><span class="line">                    switch = <span class="literal">True</span></span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">if</span> switch == <span class="literal">True</span>:</span><br><span class="line">            switch = <span class="literal">False</span></span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        <span class="keyword">elif</span> h2_list[i][<span class="number">0</span>] == <span class="string">"言论与数字"</span>:            <span class="comment"># 单独匹配</span></span><br><span class="line">            lst1 = h2_list[i][<span class="number">1</span>].xpath(<span class="string">'./following::a[position()&lt;=18]'</span>)    </span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                lst2 = h2_list[i+<span class="number">1</span>][<span class="number">1</span>].xpath(<span class="string">'./preceding::a[position()&lt;=18]'</span>)</span><br><span class="line">            <span class="keyword">except</span>:</span><br><span class="line">                lst2 = html.xpath(<span class="string">'//div[@class="asset-footer"]/h3/preceding::a[position()&lt;=18]'</span>)</span><br><span class="line">            <span class="comment"># 获取所有a，拿到上5行文字，发现序号就跳出</span></span><br><span class="line">            lst_repet = [x <span class="keyword">for</span> x <span class="keyword">in</span> lst1 <span class="keyword">if</span> x <span class="keyword">in</span> lst2]        <span class="comment"># 获取到该类别下的a元素</span></span><br><span class="line">            <span class="keyword">for</span> a <span class="keyword">in</span> lst_repet:</span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    st_url = a.xpath(<span class="string">'./@href'</span>)[<span class="number">0</span>]</span><br><span class="line">                <span class="keyword">except</span>:</span><br><span class="line">                    st_url = <span class="string">''</span></span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line">                st_name = a.xpath(<span class="string">'./text()'</span>)</span><br><span class="line">                st_info = []            </span><br><span class="line">                st_info_list = a.xpath(<span class="string">'./preceding::p[position()&lt;=5]/text()'</span>)<span class="comment"># 排列是从上往下</span></span><br><span class="line">                <span class="keyword">for</span> info <span class="keyword">in</span> st_info_list[::<span class="number">-1</span>]:</span><br><span class="line">                    <span class="keyword">if</span> info <span class="keyword">in</span> <span class="string">''</span>.join([str(x)+<span class="string">'、 '</span> <span class="keyword">for</span> x <span class="keyword">in</span> range(<span class="number">1</span>,<span class="number">15</span>)]):<span class="comment"># 找到序号</span></span><br><span class="line">                        <span class="keyword">break</span>   <span class="comment"># 是序号，停掉</span></span><br><span class="line">                    <span class="keyword">else</span>:</span><br><span class="line">                        st_info.append(info)</span><br><span class="line">                <span class="keyword">if</span> st_url == <span class="string">''</span>:</span><br><span class="line">                    <span class="keyword">pass</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    st_info=<span class="string">''</span>.join(st_info)</span><br><span class="line">                    st_info = st_info.replace(<span class="string">'（@ 投稿）'</span>,<span class="string">' '</span>)</span><br><span class="line">                    st_info = st_info.replace(<span class="string">'（@'</span>,<span class="string">' '</span>)</span><br><span class="line">                    st_name=<span class="string">''</span>.join(st_name)</span><br><span class="line"></span><br><span class="line">                    str_content = <span class="string">r"&gt; &lt;a href='"</span>+st_url+<span class="string">r"'&gt;&lt;center&gt;&lt;b&gt;"</span>+st_name+<span class="string">r"&lt;/b&gt;&lt;/center&gt;&lt;/a&gt;"</span>+<span class="string">r"&lt;span class='p gry'&gt;+st_info+r&lt;/span&gt; "</span>+<span class="string">"\n\n"</span></span><br><span class="line">                    tmp.append(str_content)   <span class="comment"># 改格式</span></span><br><span class="line">            data[h2_list[i][<span class="number">0</span>]] = <span class="string">''</span>.join(tmp)</span><br><span class="line">        <span class="keyword">elif</span> h2_list[i][<span class="number">0</span>] == <span class="string">"言论"</span>:            <span class="comment"># 单独匹配</span></span><br><span class="line">            lst1 = h2_list[i][<span class="number">1</span>].xpath(<span class="string">'./following::a[position()&lt;=10]'</span>)    </span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                lst2 = h2_list[i+<span class="number">1</span>][<span class="number">1</span>].xpath(<span class="string">'./preceding::a[position()&lt;=10]'</span>)</span><br><span class="line">            <span class="keyword">except</span>:</span><br><span class="line">                lst2 = html.xpath(<span class="string">'//div[@class="asset-footer"]/h3/preceding::a[position()&lt;=10]'</span>)</span><br><span class="line">            <span class="comment"># 获取所有a，拿到上5行文字，发现序号就跳出</span></span><br><span class="line">            lst_repet = [x <span class="keyword">for</span> x <span class="keyword">in</span> lst1 <span class="keyword">if</span> x <span class="keyword">in</span> lst2]        <span class="comment"># 获取到该类别下的a元素</span></span><br><span class="line">            <span class="keyword">for</span> a <span class="keyword">in</span> lst_repet:</span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    st_url = a.xpath(<span class="string">'./@href'</span>)[<span class="number">0</span>]</span><br><span class="line">                <span class="keyword">except</span>:</span><br><span class="line">                    st_url = <span class="string">''</span></span><br><span class="line">                    <span class="keyword">continue</span></span><br><span class="line">                st_name = a.xpath(<span class="string">'./text()'</span>)</span><br><span class="line">                st_info = []            </span><br><span class="line">                st_info_list = a.xpath(<span class="string">'./preceding::p[position()&lt;=5]/text()'</span>)<span class="comment"># 排列是从上往下</span></span><br><span class="line">                <span class="keyword">for</span> info <span class="keyword">in</span> st_info_list[::<span class="number">-1</span>]:</span><br><span class="line">                    <span class="keyword">if</span> info <span class="keyword">in</span> <span class="string">''</span>.join([str(x)+<span class="string">'、 '</span> <span class="keyword">for</span> x <span class="keyword">in</span> range(<span class="number">1</span>,<span class="number">15</span>)]):<span class="comment"># 找到序号</span></span><br><span class="line">                        <span class="keyword">break</span>   <span class="comment"># 是序号，停掉</span></span><br><span class="line">                    <span class="keyword">else</span>:</span><br><span class="line">                        st_info.append(info)</span><br><span class="line">                <span class="keyword">if</span> st_url == <span class="string">''</span>:</span><br><span class="line">                    <span class="keyword">pass</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    st_info=<span class="string">''</span>.join(st_info)</span><br><span class="line">                    st_info = st_info.replace(<span class="string">'（@ 投稿）'</span>,<span class="string">' '</span>)</span><br><span class="line">                    st_info = st_info.replace(<span class="string">'（@'</span>,<span class="string">' '</span>)</span><br><span class="line">                    st_name=<span class="string">''</span>.join(st_name)</span><br><span class="line"></span><br><span class="line">                    str_content = <span class="string">r"&gt; &lt;a href='"</span>+st_url+<span class="string">r"'&gt;&lt;center&gt;&lt;b&gt;"</span>+st_name+<span class="string">r"&lt;/b&gt;&lt;/center&gt;&lt;/a&gt;"</span>+<span class="string">r"&lt;span class='p gry'&gt;+st_info+r&lt;/span&gt; "</span>+<span class="string">"\n\n"</span></span><br><span class="line">                    tmp.append(str_content)   <span class="comment"># 改格式</span></span><br><span class="line">            data[h2_list[i][<span class="number">0</span>]] = <span class="string">''</span>.join(tmp)</span><br><span class="line">        <span class="keyword">else</span> :</span><br><span class="line">            print(h2_list[i][<span class="number">0</span>],<span class="string">'----'</span>)</span><br><span class="line">            lst1 = h2_list[i][<span class="number">1</span>].xpath(<span class="string">'./following::a[position()&lt;=20]'</span>)        </span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                lst2 = h2_list[i+<span class="number">1</span>][<span class="number">1</span>].xpath(<span class="string">'./preceding::a[position()&lt;=20]'</span>)</span><br><span class="line">            <span class="keyword">except</span>:</span><br><span class="line">                lst2 = html.xpath(<span class="string">'//div[@class="asset-footer"]/h3/preceding::a[position()&lt;=20]'</span>)</span><br><span class="line">            <span class="keyword">for</span> x <span class="keyword">in</span> lst1:                                    <span class="comment"># 找重复太耗时了</span></span><br><span class="line">                <span class="keyword">if</span> x <span class="keyword">in</span> lst2:                        </span><br><span class="line">                    st_name = x.xpath(<span class="string">'./text()'</span>)</span><br><span class="line">                    </span><br><span class="line">                    <span class="keyword">try</span>:</span><br><span class="line">                        st_url = x.xpath(<span class="string">'./@href'</span>)[<span class="number">0</span>]</span><br><span class="line">                    <span class="keyword">except</span> Exception <span class="keyword">as</span> err:</span><br><span class="line">                        st_url = <span class="string">''</span></span><br><span class="line">                    <span class="comment"># 文摘单独</span></span><br><span class="line">                    <span class="keyword">if</span> h2_list[i][<span class="number">0</span>] == <span class="string">"文摘"</span>:</span><br><span class="line">                        <span class="keyword">if</span> st_url == <span class="string">''</span>:</span><br><span class="line">                            <span class="keyword">continue</span></span><br><span class="line">                        <span class="keyword">else</span>:</span><br><span class="line">                            str_content = <span class="string">r"&gt; &lt;a href='"</span>+st_url+<span class="string">r"'&gt;&lt;center&gt;&lt;b&gt;"</span>+<span class="string">''</span>.join(st_name)+<span class="string">r"&lt;/b&gt;&lt;/center&gt;&lt;/a&gt;"</span>+<span class="string">"\n\n"</span></span><br><span class="line">                            tmp.append(str_content)   <span class="comment"># 改格式</span></span><br><span class="line">                            <span class="keyword">continue</span></span><br><span class="line">                    st_a = x.xpath(<span class="string">'./../text()'</span>)</span><br><span class="line">                    <span class="keyword">if</span> <span class="string">' 投稿）'</span> <span class="keyword">in</span> st_a:</span><br><span class="line">                        <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">                    st_info_1 = x.xpath(<span class="string">'./following::p[position()=1]/text()'</span>)</span><br><span class="line">                    st_info_2 = x.xpath(<span class="string">'./following::p[position()=2]/text()'</span>)</span><br><span class="line">                    st_info_3 = x.xpath(<span class="string">'./following::c[position()=3]/text()'</span>)</span><br><span class="line">                    <span class="keyword">if</span> len(st_info_1)&gt;=<span class="number">1</span> <span class="keyword">and</span> st_info_1[<span class="number">0</span>] <span class="keyword">in</span> <span class="string">''</span>.join([str(c)+<span class="string">'、 '</span> <span class="keyword">for</span> c <span class="keyword">in</span> range(<span class="number">1</span>,<span class="number">15</span>)]) :        <span class="comment"># 判断是不是下一个序号</span></span><br><span class="line">                        st_info = <span class="string">''</span></span><br><span class="line">                    <span class="keyword">elif</span> len(st_info_2)&gt;=<span class="number">1</span> <span class="keyword">and</span> st_info_2[<span class="number">0</span>]  <span class="keyword">in</span> <span class="string">''</span>.join([str(c)+<span class="string">'、 '</span> <span class="keyword">for</span> c <span class="keyword">in</span> range(<span class="number">1</span>,<span class="number">15</span>)]) :</span><br><span class="line">                        st_info = <span class="string">''</span>.join(st_info_1)</span><br><span class="line">                    <span class="keyword">elif</span> len(st_info_3)&gt;=<span class="number">1</span> <span class="keyword">and</span> st_info_3[<span class="number">0</span>]  <span class="keyword">in</span> <span class="string">''</span>.join([str(c)+<span class="string">'、 '</span> <span class="keyword">for</span> c <span class="keyword">in</span> range(<span class="number">1</span>,<span class="number">15</span>)]) :</span><br><span class="line">                        st_info = <span class="string">''</span>.join(st_info_1)+<span class="string">''</span>.join(st_info_2)</span><br><span class="line">                    <span class="keyword">else</span>:</span><br><span class="line">                        st_info = <span class="string">''</span>.join(st_info_1)+<span class="string">' '</span>+<span class="string">''</span>.join(st_info_2)+<span class="string">''</span>.join(st_info_3)</span><br><span class="line">                    </span><br><span class="line">                    <span class="keyword">if</span> st_url == <span class="string">''</span> <span class="keyword">or</span> st_info == <span class="string">''</span>:</span><br><span class="line">                        <span class="keyword">pass</span></span><br><span class="line">                    <span class="keyword">else</span>:</span><br><span class="line">                        st_name=<span class="string">''</span>.join(st_name)</span><br><span class="line">                        st_info = st_info.replace(<span class="string">'（@ 投稿）'</span>,<span class="string">' '</span>)</span><br><span class="line">                        st_info = st_info.replace(<span class="string">'（@'</span>,<span class="string">' '</span>)</span><br><span class="line">                        str_content = <span class="string">r"&gt; &lt;a href='"</span>+st_url+<span class="string">r"'&gt;&lt;center&gt;&lt;b&gt;"</span>+st_name+<span class="string">r"&lt;/b&gt;&lt;/center&gt;&lt;/a&gt;"</span>+<span class="string">r"&lt;span class='p gry'&gt;+st_info+r&lt;/span&gt; "</span>+<span class="string">"\n\n"</span></span><br><span class="line">                        tmp.append(str_content)   <span class="comment"># 改格式</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">pass</span>        </span><br><span class="line">            data[h2_list[i][<span class="number">0</span>]] = <span class="string">''</span>.join(tmp)            </span><br><span class="line">    <span class="keyword">return</span> data    </span><br><span class="line"></span><br><span class="line"><span class="comment"># 处理成maskdown可用内容</span></span><br><span class="line"><span class="meta">@timer</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">maskdown_form</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'**********整合数据*********'</span>)</span><br><span class="line">    all = []</span><br><span class="line">    str_lst = []</span><br><span class="line">    datas = &#123;&#125;</span><br><span class="line">    url_all_dict = get_all_url()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> names,url <span class="keyword">in</span> url_all_dict.items():        <span class="comment"># 不要</span></span><br><span class="line">        name = int(re.search(<span class="string">'.*?(\d+).*?'</span>,names)[<span class="number">1</span>]    )    <span class="comment"># 获取日期数</span></span><br><span class="line">        <span class="keyword">if</span> name&lt;<span class="number">51</span> :</span><br><span class="line">            <span class="keyword">break</span>        <span class="comment"># 先获取一半</span></span><br><span class="line">        data = get_page_info(names,url)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 两期一tab，每类别为标签页  -- 仍然太多，需要翻页</span></span><br><span class="line">        <span class="comment"># if name%2 == 0:            # 获取两期整合的数据</span></span><br><span class="line">            <span class="comment"># datas = data</span></span><br><span class="line">        <span class="comment"># else:</span></span><br><span class="line">            <span class="comment"># for dt_k,dt_v in data.items():</span></span><br><span class="line">                <span class="comment"># if dt_k in datas:    # 如果类别已有，就追加</span></span><br><span class="line">                    <span class="comment"># datas[dt_k] = datas[dt_k]+dt_v</span></span><br><span class="line">                <span class="comment"># else:                # 没有就新增</span></span><br><span class="line">                    <span class="comment"># datas[dt_k] = dt_v</span></span><br><span class="line">            <span class="comment"># for cls_name,cls_dt in datas.items():        # 处理两期的数据</span></span><br><span class="line">            </span><br><span class="line">        <span class="keyword">for</span> cls_name,cls_dt <span class="keyword">in</span> data.items():        <span class="comment"># 处理一期的数据</span></span><br><span class="line">            new_str = <span class="string">r'&lt;!-- tab '</span>+cls_name+<span class="string">r'  --&gt;'</span>+<span class="string">'\n'</span>+cls_dt+<span class="string">r'&lt;!-- endtab  --&gt;'</span>+<span class="string">'\n'</span></span><br><span class="line">            <span class="keyword">if</span> cls_name==<span class="string">'文摘'</span>:</span><br><span class="line">                str_lst.insert(<span class="number">0</span>,new_str)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                str_lst.append(new_str)</span><br><span class="line">        </span><br><span class="line">        all.append(<span class="string">"略过"</span>) <span class="comment"># 此处拼接成可用的 maskdown语法的字符串</span></span><br><span class="line">        str_lst.clear()        <span class="comment">#清空</span></span><br><span class="line">        datas.clear()        </span><br><span class="line">    <span class="keyword">return</span> <span class="string">''</span>.join(all)</span><br><span class="line">    </span><br><span class="line"><span class="comment"># 写入文件</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">write_file</span><span class="params">(data)</span>:</span></span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">r'd:\资源.txt'</span>, <span class="string">'w'</span>,encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> f:</span><br><span class="line">        f.write(data)</span><br><span class="line"></span><br><span class="line">data = maskdown_form()    </span><br><span class="line">write_file(data)</span><br></pre></td></tr></table></figure></div></div></div>
+
+
+
+
+
+
+
+
+
+
+
+
+          
+            <div class="article_footer">
+              
+                
+
+              
+            </div>
+          
+        </div>
+        
+          
+
+
+  <section class="meta" id="footer-meta">
+    <div class="new-meta-box">
+      
+        
+          <div class="new-meta-item date">
+  <a class="notlink">
+    <i class="fas fa-calendar-alt fa-fw" aria-hidden="true"></i>
+    <p>发布于：2020年4月26日</p>
+  </a>
+</div>
+
+        
+      
+        
+          
+  
+  <div class="new-meta-item meta-tags"><a class="tag" href="/tags/python/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>python</p></a></div> <div class="new-meta-item meta-tags"><a class="tag" href="/tags/%E7%A7%91%E6%8A%80%E7%88%B1%E5%A5%BD%E8%80%85%E5%91%A8%E5%88%8A/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>科技爱好者周刊</p></a></div> <div class="new-meta-item meta-tags"><a class="tag" href="/tags/%E7%88%AC%E8%99%AB/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>爬虫</p></a></div>
+
+
+        
+      
+        
+          
+
+        
+      
+        
+          
+  <div class="new-meta-item share -mob-share-list">
+  <div class="-mob-share-list share-body">
+    
+      
+        <a class="-mob-share-qq" title rel="external nofollow noopener noreferrer" href="http://connect.qq.com/widget/shareqq/index.html?url=https://wzzxx.top/2020/04/26/%E7%A7%91%E6%8A%80%E7%88%B1%E5%A5%BD%E8%80%85%E5%91%A8%E5%88%8A%E6%8A%93%E5%8F%96%E8%BF%87%E7%A8%8B/&title=科技爱好者周刊抓取源码 - wzzxx&summary=周刊内容质量很高，截止现在都104期了，里面好多不错的网站/工具资源，只是站内并无整合，每期内容较杂，或套用103期的话题，半衰期较短，所有抓取了每期中相对半衰期较长的 文章/言论/工具等资源，整合在一起，抓取的过程记录如下" target="_blank">
+          
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="/images/qq.png">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-qzone" title rel="external nofollow noopener noreferrer" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://wzzxx.top/2020/04/26/%E7%A7%91%E6%8A%80%E7%88%B1%E5%A5%BD%E8%80%85%E5%91%A8%E5%88%8A%E6%8A%93%E5%8F%96%E8%BF%87%E7%A8%8B/&title=科技爱好者周刊抓取源码 - wzzxx&summary=周刊内容质量很高，截止现在都104期了，里面好多不错的网站/工具资源，只是站内并无整合，每期内容较杂，或套用103期的话题，半衰期较短，所有抓取了每期中相对半衰期较长的 文章/言论/工具等资源，整合在一起，抓取的过程记录如下" target="_blank">
+          
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://cdn.jsdelivr.net/gh/xaoxuu/cdn-assets/logo/128/qzone.png">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-weibo" title rel="external nofollow noopener noreferrer" href="http://service.weibo.com/share/share.php?url=https://wzzxx.top/2020/04/26/%E7%A7%91%E6%8A%80%E7%88%B1%E5%A5%BD%E8%80%85%E5%91%A8%E5%88%8A%E6%8A%93%E5%8F%96%E8%BF%87%E7%A8%8B/&title=科技爱好者周刊抓取源码 - wzzxx&summary=周刊内容质量很高，截止现在都104期了，里面好多不错的网站/工具资源，只是站内并无整合，每期内容较杂，或套用103期的话题，半衰期较短，所有抓取了每期中相对半衰期较长的 文章/言论/工具等资源，整合在一起，抓取的过程记录如下" target="_blank">
+          
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAMAAABOo35HAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAC9UExURVlZWdPT07KysmRkZIWFhfT09JmZmWZmZm9vb39/fxkZGUxMTDMzM3p6epCQkKamppubm729venp6cjIyN7e3tbW1s/Pz8LCwnx8fLS0tFZWVoiIiI+Pj6GhoeTk5Glpabu7u93d3evr66CgoJSUlKqqqsnJyeDg4Hd3d8PDw+Xl5bi4uNHR0dvb26Ojo6urq+fn51hYWDg4OCgoKHBwcK2traenp0FBQe7u7vHx8U5OTre3t8zMzHV1df///7GrnpQAAAA/dFJOU///////////////////////////////////////////////////////////////////////////////////AI4mfBcAAAUGSURBVHja7NoJb6M4GMZxY0NCD64kve/pMZ2d3Z297+X7f6zFNmBAMUXa6URl/q9UJSWPUPzrizFWRUlNLgEBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYYIEFAVhggQUWWGBBABZYYIEFFlgQgAUWWGCBBRYEYIEFFlhggQUBWGCBBRZYYEEAFlhggQUWWBCABRZYYIEFFgRggQUWWGCBBQFYYIEFFlhgQQAWWGCBBRZYEIAFFlhggQUWBGCBBRZYn6cCIcRXgvX/h9qcIVBqDdbEM8RCxGCB9QqXYRwHYDHBgwXWl8eKZKiESHI3Ba1kWs3fKixcaJUl1YyeBm7Ocq+yLItUiVBGnXxenSHJolIKEcwHq6ikbOX1YGVzQCTN8LPmSLreghUl9sN4Uw7yajMrLC0TZ1ImzqY6FEop0+pIaEN5HaoOxVuwEqFyc4I46uSlzOLqgxlh6UaR9l3VYWl9Fdoxb1Q90KJtu41pwwFW/WHhTtW8i7TafLCqRsk6bsGw63L9qurXRmuIlbT9lDQnlXU+nBFW1Q2qnZbDprWa2tjR90LZFqx1/+Td/HpGWLlrLDvIwTcx6dQ1Vrntbig68cDms3JwbA5Y1azs1ger6sNV/bbIw1jU81MvNAGrl58RVn8ozW+btF08iGFoAlYvP3csfVur1gJBEIA1uBmue5dhZDOyO2epbmgCVi8/I6x0MMHH9pjsTfBhNzQBq5uPZoQlB0uH3DZG4EZqQ26fL3sZq5uf09Ih6qw3i/pm6BZO0qZX7rrUS68Xsbr5ZE4rePMk08pk9aUZugfqppvs6AM1Acvlo/StP+6EbW06z8hJqxbYp2BZPQUnFsLsKuhQdaHqn5ewbF7KXIn0jWO5MqOQ7RaNLPtbNMmmhimj0GUmYLl8Gs0Lq4wyPbTu1l2QKqHSouzs3OlDIslW5SQsnY/NXmFplyNvEuuLV/Tau9BzwiraDUSwXmysztYWWNtL1psXeumgIrDGaqXvBfUuvtqUYI3V2t1wk1e2msFluJJm6zDJXv/fIfjPP7DAAgsssCiwwAILLLDAosACCyywwAKLAgsssMACC6zt9fDz/v75tyOB+98PD2+ORgKffjw4OP1uJPDxl+Xy8v1I4MPF3t7VNyOB4/vF4uzdzrG+39f1kz/w66Guv/yBvw90KX/gZKkr8Qf+2dOV+gNHC12/7RxrabD2/a31bLAO/a11YbAO/K21MFhLf2s9Gqw9f2vdGqzFu11jnVusE2/gxmI9eQOnFuvYG7i0WH7uK4t15w2cWazrXWP9a7H8f/bQYvm/6IPF+sF/pVssf19Ii/WH/0K2WH/uGuvEWC39gSdj9Twy+Rqri5EZx1gt/IE7Y/XoD1wbq9vd3w1PlufnD2OBp+ebm/uxwPHF6emnscDR4vLy41jg7vHq6sNY4Pr27OyYdRaLUrDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssMCiwAILLLDAAosCCyywwAILLAossMACCyywKLDAAgsssL6u+k+AAQCR9eHtLKvLfwAAAABJRU5ErkJggg==" data-original="https://cdn.jsdelivr.net/gh/xaoxuu/cdn-assets/logo/128/weibo.png">
+          
+        </a>
+      
+    
+  </div>
+</div>
+
+
+
+        
+      
+    </div>
+  </section>
+
+
+        
+        
+          <div class="prev-next">
+            
+            
+              <a class="next" href="/2020/04/26/%E7%A7%91%E6%8A%80%E7%88%B1%E5%A5%BD%E8%80%85%E5%91%A8%E5%88%8A%E8%B5%84%E6%BA%90%E6%95%B4%E7%90%862/">
+                <p class="title">科技爱好者周刊资源整理（51-104期）<i class="fas fa-chevron-right" aria-hidden="true"></i></p>
+                <p class="content">整合了51-104期的资源，都是些实用的网站，工具，有意思的言论等，质量很高
+
+
+过程
+数据来源 阮一峰的科技爱好者周刊关于如何获取的 点这里本篇包含 51-104期 的数据，部分无法访问的网址...</p>
+              </a>
+            
+          </div>
+        
+      </section>
+    </article>
+  
+
+  
+    <!-- 显示推荐文章和评论 -->
+
+
+
+  <article class="post white-box reveal comments shadow">
+    <section class="article typo">
+      <p ct><i class="fas fa-comments"></i> 评论</p>
+      
+      
+      
+      
+      
+        <section id="comments">
+          <div id="valine_container" class="valine_thread">
+            <i class="fas fa-cog fa-spin fa-fw fa-2x"></i>
+          </div>
+        </section>
+      
+      
+    </section>
+  </article>
+
+
+  
+
+
+
+
+<!-- 根据页面mathjax变量决定是否加载MathJax数学公式js -->
+
+
+
+  <script>
+    window.subData = {
+      title: '科技爱好者周刊抓取源码',
+      tools: true
+    }
+  </script>
+
+
+</div>
+<aside class="l_side">
+  
+  
+
+  
+    
+    
+
+
+  <section class="widget toc-wrapper shadow desktop mobile">
+    
+  <header>
+    
+      <i class="fas fa-list fa-fw" aria-hidden="true"></i><span class="name">本文目录</span>
+    
+  </header>
+
+
+    <div class="content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#过程及源码"><span class="toc-text">过程及源码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#抓取过程"><span class="toc-text"> 抓取过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#源码"><span class="toc-text"> 源码</span></a></li></ol></li></ol>
+    </div>
+  </section>
+
+
+  
+
+
+</aside>
+
+
+  
+  <footer class="clearfix">
+    <br><br>
+    
+      
+        <br>
+        <div class="social-wrapper">
+          
+            
+              <a href="/atom.xml" class="social fas fa-rss flat-btn" target="_blank" rel="external nofollow noopener noreferrer">
+              </a>
+            
+          
+            
+              <a href="mailto:2337381324@qq.com" class="social fas fa-envelope flat-btn" target="_blank" rel="external nofollow noopener noreferrer">
+              </a>
+            
+          
+            
+              <a href="https://github.com/wzzxx7" class="social fab fa-github flat-btn" target="_blank" rel="external nofollow noopener noreferrer">
+              </a>
+            
+          
+        </div>
+      
+    
+      
+        <div class="copyright">
+        <p><a href="https://wzzxx.top">Copyright © 2020-2020 wzzxx</a></p>
+
+        </div>
+      
+    
+      
+        本站使用
+        <a href="https://volantis.js.org/" target="_blank" class="codename" rel="external nofollow noopener noreferrer">Volantis</a>
+        作为主题，总访问量为
+          <span id="busuanzi_value_site_pv"><i class="fas fa-circle-notch fa-spin fa-fw" aria-hidden="true"></i></span>
+          次
+        
+      
+    
+  </footer>
+
+<script>setLoadingBarProgress(80);</script>
+
+
+      <script>setLoadingBarProgress(60);</script>
+    </div>
+    <a class="s-top fas fa-arrow-up fa-fw" href="javascript:void(0)"></a>
+  </div>
+  
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4/dist/jquery.min.js"></script>
+
+
+  <script>
+    
+    var SEARCH_SERVICE = "hexo" || "hexo";
+    var ROOT = "/" || "/";
+    if (!ROOT.endsWith('/')) ROOT += '/';
+  </script>
+
+
+  <script async src="https://cdn.jsdelivr.net/gh/xaoxuu/cdn-volantis@2/js/instant_page.js" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/scrollreveal@4.0.6/dist/scrollreveal.min.js"></script>
+  <script type="text/javascript">
+    $(function() {
+      ScrollReveal().reveal('.l_main .reveal', {
+        distance: '8px',
+        duration: '800',
+        interval: '100',
+        scale: '1'
+      });
+    });
+  </script>
+
+
+  
+<script src="https://cdn.jsdelivr.net/npm/node-waves@0.7.6/dist/waves.min.js"></script>
+
+  <script type="text/javascript">
+    $(function() {
+      Waves.attach('.flat-btn', ['waves-button']);
+      Waves.attach('.float-btn', ['waves-button', 'waves-float']);
+      Waves.attach('.float-btn-light', ['waves-button', 'waves-float', 'waves-light']);
+      Waves.attach('.flat-box', ['waves-block']);
+      Waves.attach('.float-box', ['waves-block', 'waves-float']);
+      Waves.attach('.waves-image');
+      Waves.init();
+    });
+  </script>
+
+
+  <script async src="https://cdn.jsdelivr.net/gh/xaoxuu/cdn-busuanzi@2.3/js/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4/dist/Valine.min.js"></script>
+
+  
+  <script>
+  var GUEST_INFO = ['nick','mail','link'];
+  var meta = 'nick,mail,link'.split(',').filter(function(item){
+    return GUEST_INFO.indexOf(item) > -1
+  });
+  var REQUIRED_FIELDS = ['nick','mail','link'];
+  var requiredFields = 'nick,mail'.split(',').filter(function(item){
+    return REQUIRED_FIELDS.indexOf(item) > -1
+  });
+  var valine = new Valine();
+  function emoji(path, idx, ext) {
+      return path + "/" + path + "-" + idx + "." + ext;
+  }
+  var emojiMaps = {};
+  for (var i = 1; i <= 54; i++) {
+    emojiMaps['tieba-' + i] = emoji('tieba', i, 'png');
+  }
+  for (var i = 1; i <= 101; i++) {
+    emojiMaps['qq-' + i] = emoji('qq', i, 'gif');
+  }
+  for (var i = 1; i <= 116; i++) {
+    emojiMaps['aru-' + i] = emoji('aru', i, 'gif');
+  }
+  for (var i = 1; i <= 125; i++) {
+    emojiMaps['twemoji-' + i] = emoji('twemoji', i, 'png');
+  }
+  for (var i = 1; i <= 4; i++) {
+    emojiMaps['weibo-' + i] = emoji('weibo', i, 'png');
+  }
+  valine.init({
+    el: '#valine_container',
+    meta: meta,
+    
+    appId: "Bqnsv4VCRWK474lbyhoWb86D-gzGzoHsz",
+    appKey: "HSBzygeiTtYT34HzvymuOSoL",
+    placeholder: "快来评论吧~",
+    pageSize:'10',
+    avatar:'robohash',
+    lang:'zh-cn',
+    visitor: 'true',
+    highlight: 'true',
+    mathJax: 'false',
+    enableQQ: 'true',
+    requiredFields: requiredFields,
+    emojiCDN: 'https://cdn.jsdelivr.net/gh/xaoxuu/cdn-assets/emoji/valine/',
+    emojiMaps: emojiMaps
+  })
+  </script>
+
+
+
+
+
+  
+<script src="/js/app.js"></script>
+
+
+
+  
+<script src="https://cdn.jsdelivr.net/gh/xaoxuu/cdn-volantis@2.6.4/js/search.js"></script>
+
+
+
+  
+<script src="https://cdn.jsdelivr.net/gh/xaoxuu/cdn-volantis@2/js/comment_typing.js"></script>
+
+
+
+
+
+
+<!-- 复制 -->
+
+  <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="fas fa-copy"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('fa-copy');
+        $icon.addClass('fa-check-circle');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('fa-check-circle');
+          $icon.addClass('fa-copy');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('fa-copy');
+        $icon.addClass('fa-times-circle');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('fa-times-circle');
+          $icon.addClass('fa-copy');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+
+
+
+
+<!-- fancybox -->
+
+  <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+<script>
+  let LAZY_LOAD_IMAGE = "[object Object]";
+  $(".article-entry").find("div.fancybox").find("img").each(function () {
+      var element = document.createElement("a");
+      $(element).attr("data-fancybox", "gallery");
+      $(element).attr("href", $(this).attr("src"));
+      /* 图片采用懒加载处理时,
+       * 一般图片标签内会有个属性名来存放图片的真实地址，比如 data-original,
+       * 那么此处将原本的属性名src替换为对应属性名data-original,
+       * 修改如下
+       */
+       if (LAZY_LOAD_IMAGE) {
+         $(element).attr("href", $(this).attr("data-original"));
+       }
+      $(this).wrap(element);
+  });
+</script>
+
+
+
+
+
+
+  <script>setLoadingBarProgress(100);</script>
+<script>!function(e){var c=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function i(){for(var r=0;r<c.length;r++)t=c[r],0<=(n=t.getBoundingClientRect()).bottom&&0<=n.left&&n.top<=(e.innerHeight||document.documentElement.clientHeight)&&function(){var t,n,e,i,o=c[r];t=o,n=function(){c=c.filter(function(t){return o!==t})},e=new Image,i=t.getAttribute("data-original"),e.onload=function(){t.src=i,n&&n()},e.src=i}();var t,n}i(),e.addEventListener("scroll",function(){var t,n;t=i,n=e,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(n)},500)})}(this);</script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script></body>
+</html>
